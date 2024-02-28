@@ -1,0 +1,153 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Images {
+  id            Int            @id @unique @default(autoincrement())
+  raw_image     String
+  Organizations Organizations?
+  Users         Users[]
+  BoardsIcon    Boards[]       @relation("BoardsIcon")
+  BoardsBg      Boards[]       @relation("BoardsBg")
+  TasksImages   TasksImages[]
+}
+
+model Users {
+  id                 Int    @id @default(autoincrement())
+  name               String
+  first_name         String
+  phone_number       String
+  email_address      String @unique
+  password           String
+  profile_picture_id Int
+
+  profile_picture Images @relation(fields: [profile_picture_id], references: [id])
+
+  groups                   Groups[]
+  owned_organization       Organizations[]
+  OrganizationsMemberships OrganizationsMemberships[]
+  GroupsMemberships        GroupsMemberships[]
+  TasksUsers               TasksUsers[]
+}
+
+model Organizations {
+  id       Int    @id @default(autoincrement())
+  name     String
+  owner_id Int
+  logo_id  Int    @unique
+
+  logo  Images @relation(fields: [logo_id], references: [id])
+  owner Users  @relation(fields: [owner_id], references: [id])
+
+  Groups                   Groups?
+  Boards                   Boards?
+  OrganizationsMemberships OrganizationsMemberships[]
+}
+
+model Groups {
+  id              Int    @id @default(autoincrement())
+  organization_id Int    @unique
+  chief_id        Int    @unique
+  name            String
+
+  chief             Users               @relation(fields: [chief_id], references: [id])
+  organization      Organizations       @relation(fields: [organization_id], references: [id])
+  GroupsMemberships GroupsMemberships[]
+}
+
+model Boards {
+  id              Int    @id @default(autoincrement())
+  organization_id Int    @unique
+  name            String
+  icon_id         Int    @unique
+  background_id   Int    @unique
+
+  organization Organizations @relation(fields: [organization_id], references: [id])
+  icon         Images        @relation(fields: [icon_id], references: [id], name: "BoardsIcon")
+  background   Images        @relation(fields: [background_id], references: [id], name: "BoardsBg")
+
+  TaskGroups TaskGroups[]
+}
+
+model TaskGroups {
+  id       Int    @id @default(autoincrement())
+  board_id Int
+  name     String
+  order    Int
+
+  board Boards  @relation(fields: [board_id], references: [id])
+  Tasks Tasks[]
+}
+
+model Tasks {
+  id            Int      @id @default(autoincrement())
+  task_group_id Int
+  name          String
+  description   String
+  order         Int
+  due_date      DateTime
+  status        String
+
+  task_group TaskGroups @relation(fields: [task_group_id], references: [id])
+
+  TaskVideos  TaskVideos[]
+  TasksImages TasksImages[]
+  TasksUsers  TasksUsers[]
+}
+
+model TaskVideos {
+  id       Int @id @default(autoincrement())
+  task_id  Int
+  video_id Int
+
+  task  Tasks  @relation(fields: [task_id], references: [id])
+  video Videos @relation(fields: [video_id], references: [id])
+}
+
+model Videos {
+  id         Int          @id @default(autoincrement())
+  video_link String
+  TaskVideos TaskVideos[]
+}
+
+model TasksImages {
+  id       Int @id @default(autoincrement())
+  task_id  Int
+  image_id Int
+
+  task  Tasks  @relation(fields: [task_id], references: [id])
+  image Images @relation(fields: [image_id], references: [id])
+}
+
+model OrganizationsMemberships {
+  id             Int @id @default(autoincrement())
+  organizationId Int
+  userId         Int
+
+  organization Organizations @relation(fields: [organizationId], references: [id])
+  user         Users         @relation(fields: [userId], references: [id])
+}
+
+model GroupsMemberships {
+  id      Int @id @default(autoincrement())
+  groupId Int
+  userId  Int
+
+  group Groups @relation(fields: [groupId], references: [id])
+  user  Users  @relation(fields: [userId], references: [id])
+}
+
+model TasksUsers {
+  id     Int @id @default(autoincrement())
+  taskId Int
+  userId Int
+
+  task Tasks @relation(fields: [taskId], references: [id])
+  user Users @relation(fields: [userId], references: [id])
+}

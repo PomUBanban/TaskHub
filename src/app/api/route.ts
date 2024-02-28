@@ -1,10 +1,8 @@
-import { cookies } from "next/headers";
+import prisma from "@/lib/prisma";
 
 export async function GET(request: Request) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("token");
-
-  return new Response("Hello, Next.js!", {
-    status: 200,
+ const data = await prisma.users.findFirst();
+  return new Response(JSON.stringify(data), {
+    headers: { "content-type": "application/json" },
   });
 }
