@@ -9,10 +9,12 @@ datasource db {
 }
 
 model Images {
-  id            Int            @id @unique @default(autoincrement())
-  raw_image     String
+  id        Int    @id @unique @default(autoincrement())
+  raw_image String
+  role      Role   @default(USER)
+
   Organizations Organizations?
-  Users         Users[]
+  Users         Users?
   BoardsIcon    Boards[]       @relation("BoardsIcon")
   BoardsBg      Boards[]       @relation("BoardsBg")
   TasksImages   TasksImages[]
@@ -25,7 +27,7 @@ model Users {
   phone_number       String
   email_address      String @unique
   password           String
-  profile_picture_id Int
+  profile_picture_id Int    @unique
 
   profile_picture Images @relation(fields: [profile_picture_id], references: [id])
 
@@ -150,4 +152,9 @@ model TasksUsers {
 
   task Tasks @relation(fields: [taskId], references: [id])
   user Users @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
 }

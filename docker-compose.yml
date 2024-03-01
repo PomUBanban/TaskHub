@@ -5,6 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+        - PORT=3000
+        - DATABASE_URL=mysql://root:root@db:3306/database
+        - NEXTAUTH_SECRET=secret
     ports:
       - "3000:3000"
     volumes:
