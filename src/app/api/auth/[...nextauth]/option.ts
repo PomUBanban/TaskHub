@@ -1,10 +1,12 @@
-import { prisma } from "@/lib/prisma";
-import type { NextAuthOptions } from "next-auth";
+import prisma from "@/lib/prisma";
+import PrismaAdapter from "@/lib/PrismaAdapter";
+import type { NextAuthOptions, Session, User } from "next-auth";
 
 import CredentialProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 
 export const options: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET as string,
   providers: [
     CredentialProvider({
       name: "credentials",
@@ -25,7 +27,6 @@ export const options: NextAuthOptions = {
         const user = await prisma.users.findFirst({
           where: { email_address: credentials.email },
         });
-
         if (user && user.password === credentials.password) {
           return user;
         } else {
@@ -39,4 +40,15 @@ export const options: NextAuthOptions = {
       clientSecret: process.env.GITHUB_SECRET as string,
     }),
   ],
+
+  callbacks: {
+    async session({ session, user }: { session: Session; user?: User }) {
+      if (user) {
+        session.user = user;
+      }
+      return session;
+    },
+  },
+
+  adapter: PrismaAdapter(prisma),
 };

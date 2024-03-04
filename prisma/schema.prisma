@@ -1,6 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -11,7 +10,6 @@ datasource db {
 model Images {
   id        Int    @id @unique @default(autoincrement())
   raw_image String
-  role      Role   @default(USER)
 
   Organizations Organizations?
   Users         Users?
@@ -21,21 +19,24 @@ model Images {
 }
 
 model Users {
-  id                 Int    @id @default(autoincrement())
-  name               String
+  id                 Int     @id @default(autoincrement())
+  name               String?
   first_name         String
-  phone_number       String
-  email_address      String @unique
-  password           String
-  profile_picture_id Int    @unique
+  phone_number       String?
+  email_address      String  @unique
+  password           String?
+  profile_picture_id Int?    @unique
+  role               Role    @default(USER)
 
-  profile_picture Images @relation(fields: [profile_picture_id], references: [id])
+  profile_picture Images? @relation(fields: [profile_picture_id], references: [id])
 
   groups                   Groups[]
   owned_organization       Organizations[]
-  OrganizationsMemberships OrganizationsMemberships[]
-  GroupsMemberships        GroupsMemberships[]
-  TasksUsers               TasksUsers[]
+  organizationsMemberships OrganizationsMemberships[]
+  groupsMemberships        GroupsMemberships[]
+  tasksUsers               TasksUsers[]
+  Sessions                 Sessions[]
+  Account                  Account[]
 }
 
 model Organizations {
@@ -157,4 +158,28 @@ model TasksUsers {
 enum Role {
   USER
   ADMIN
+}
+
+model Sessions {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                 Int       @id @default(autoincrement())
+  userId             Int
+  providerType       String
+  providerId         String
+  providerAccountId  String
+  refreshToken       String?
+  accessToken        String?
+  accessTokenExpires DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  user               Users     @relation(fields: [userId], references: [id])
+
+  @@unique([providerId, providerAccountId])
 }

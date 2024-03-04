@@ -10,5 +10,4 @@ yarn-error.log
 Dockerfile
 docker-compose.yml
 docker-compose.dev.yml
-.env
 .next
