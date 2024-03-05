@@ -102,7 +102,6 @@ export default function PrismaAdapter(client: any, options = {}): Adapter {
     },
 
     async createSession(adapterSession: AdapterSession) {
-      console.log(adapterSession);
       await client.sessions.create({
         data: {
           ...adapterSession,
@@ -127,7 +126,6 @@ export default function PrismaAdapter(client: any, options = {}): Adapter {
       const existingSession = await client.sessions.findUnique({
         where: { sessionToken: session.sessionToken },
       } as any);
-      console.log(existingSession, session);
       if (!existingSession) return null;
 
       return client.sessions.update({
