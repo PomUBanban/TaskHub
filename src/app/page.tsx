@@ -4,8 +4,8 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 
 export default async function Page() {
-  const { status, data: session } = useSession();
-  session = session as Session | null;
+  const { data } = useSession();
+  const session = data as Session | null;
   const img: Images = (await prisma.images.findUnique({
     where: { id: session?.user?.profile_picture_id ?? -1 },
   })) ?? { raw_image: "", id: 0 };
