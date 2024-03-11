@@ -12,7 +12,7 @@ model Images {
   id        Int    @id @unique @default(autoincrement())
   raw_image String
 
-  Organizations Organizations?
+  organizations Organizations[]
   Users         Users?
   BoardsIcon    Boards[]       @relation("BoardsIcon")
   BoardsBg      Boards[]       @relation("BoardsBg")
@@ -44,7 +44,7 @@ model Organizations {
   id       Int    @id @default(autoincrement())
   name     String
   owner_id Int
-  logo_id  Int    @unique
+  logo_id  Int
 
   logo  Images @relation(fields: [logo_id], references: [id])
   owner Users  @relation(fields: [owner_id], references: [id])

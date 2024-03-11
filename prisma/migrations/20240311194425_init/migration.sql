@@ -10,14 +10,16 @@ CREATE TABLE `Images` (
 -- CreateTable
 CREATE TABLE `Users` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NULL,
     `first_name` VARCHAR(191) NOT NULL,
-    `phone_number` VARCHAR(191) NOT NULL,
+    `phone_number` VARCHAR(191) NULL,
     `email_address` VARCHAR(191) NOT NULL,
-    `password` VARCHAR(191) NOT NULL,
-    `profile_picture_id` INTEGER NOT NULL,
+    `password` VARCHAR(191) NULL,
+    `profile_picture_id` INTEGER NULL,
+    `role` ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
 
     UNIQUE INDEX `Users_email_address_key`(`email_address`),
+    UNIQUE INDEX `Users_profile_picture_id_key`(`profile_picture_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -28,7 +30,6 @@ CREATE TABLE `Organizations` (
     `owner_id` INTEGER NOT NULL,
     `logo_id` INTEGER NOT NULL,
 
-    UNIQUE INDEX `Organizations_logo_id_key`(`logo_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -134,8 +135,36 @@ CREATE TABLE `TasksUsers` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `Sessions` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `sessionToken` VARCHAR(191) NOT NULL,
+    `userId` INTEGER NOT NULL,
+    `expires` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Sessions_sessionToken_key`(`sessionToken`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Account` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NOT NULL,
+    `providerType` VARCHAR(191) NOT NULL,
+    `providerId` VARCHAR(191) NOT NULL,
+    `providerAccountId` VARCHAR(191) NOT NULL,
+    `refreshToken` VARCHAR(191) NULL,
+    `accessToken` VARCHAR(191) NULL,
+    `accessTokenExpires` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Account_providerId_providerAccountId_key`(`providerId`, `providerAccountId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
-ALTER TABLE `Users` ADD CONSTRAINT `Users_profile_picture_id_fkey` FOREIGN KEY (`profile_picture_id`) REFERENCES `Images`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Users` ADD CONSTRAINT `Users_profile_picture_id_fkey` FOREIGN KEY (`profile_picture_id`) REFERENCES `Images`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Organizations` ADD CONSTRAINT `Organizations_logo_id_fkey` FOREIGN KEY (`logo_id`) REFERENCES `Images`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -193,3 +222,9 @@ ALTER TABLE `TasksUsers` ADD CONSTRAINT `TasksUsers_taskId_fkey` FOREIGN KEY (`t
 
 -- AddForeignKey
 ALTER TABLE `TasksUsers` ADD CONSTRAINT `TasksUsers_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Sessions` ADD CONSTRAINT `Sessions_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Account` ADD CONSTRAINT `Account_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

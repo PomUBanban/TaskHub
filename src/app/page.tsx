@@ -1,3 +1,5 @@
+"use client"
+
 import prisma from "@/lib/prisma";
 import { Images, Session } from "@/types";
 import { useSession } from "next-auth/react";
