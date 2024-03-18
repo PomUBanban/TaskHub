@@ -5,6 +5,7 @@ import ErrorMessage from "./ErrorMessage"; // Component to display errors
 const Page = () => {
   const [organizations, setOrganizations] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(null);
+  const [users, setUsers] = useState([]);
   const [newOrgData, setNewOrgData] = useState({
     name: "",
     owner_id: "",
@@ -15,6 +16,9 @@ const Page = () => {
     owner_id: "",
     logo_id: "",
   });
+  const [newMember, setNewMember] = useState({
+    user_id: "",
+  });
   const [error, setError] = useState(null); // New state to handle errors
 
   // Fetch organizations data on page load
@@ -24,6 +28,10 @@ const Page = () => {
         const response = await fetch("/api/organizations");
         const data = await response.json();
         setOrganizations(data);
+
+        const usersResponse = await fetch("/api/users");
+        const usersData = await usersResponse.json();
+        setUsers(usersData);
       } catch (error) {
         setError("Erreur lors de la récupération des organisations"); // Handle data fetching errors
       }
@@ -63,8 +71,27 @@ const Page = () => {
           });
           break;
 
+        case "create-member":
+          // Perform POST request using newMember and selectedOrg
+          await fetch(`/api/organizations/${selectedOrg.id}/members`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newMember),
+          });
+          // Fetch updated organizations data after adding a new member
+          const memberResponse = await fetch("/api/organizations");
+          const memberData = await memberResponse.json();
+          setOrganizations(memberData);
+          // Reset newMember after adding a new member
+          setNewMember({
+            user_id: "",
+          });
+          break;
+
         case "read":
-          // Fetch organizations data (already done on page load)
+          // No action needed for reading
           break;
 
         case "update":
@@ -94,7 +121,6 @@ const Page = () => {
               owner_id: "",
               logo_id: "",
             });
-
           }
           break;
 
@@ -133,7 +159,9 @@ const Page = () => {
             <ul>
               {organizations.map((org) => (
                 <li key={org.id}>
-                  {org.name} - Propriétaire : {org.owner_id} - Logo : {org.logo_id}
+                  {org.name} <br />- Propriétaire :{" "}
+                  {org.owner.first_name ?? org.owner.name} <br />- Logo :
+                  {org.logo.raw_image ?? org.logo.id} <br />
                 </li>
               ))}
             </ul>
@@ -148,36 +176,42 @@ const Page = () => {
                 handleCRUD("create");
               }}
             >
-              <label>Nom de l'organisation :</label>
-              <input
-                type="text"
-                placeholder="Nom de l'organisation"
-                value={newOrgData.name}
-                onChange={(e) =>
-                  setNewOrgData({ ...newOrgData, name: e.target.value })
-                }
-                required
-              />
-              <label>ID du propriétaire :</label>
-              <input
-                type="text"
-                placeholder="ID du propriétaire"
-                value={newOrgData.owner_id}
-                onChange={(e) =>
-                  setNewOrgData({ ...newOrgData, owner_id: e.target.value })
-                }
-                required
-              />
-              <label>ID du logo :</label>
-              <input
-                type="text"
-                placeholder="ID du logo"
-                value={newOrgData.logo_id}
-                onChange={(e) =>
-                  setNewOrgData({ ...newOrgData, logo_id: e.target.value })
-                }
-                required
-              />
+              <div className="row">
+                <label>Nom de l'organisation :</label>
+                <input
+                  type="text"
+                  placeholder="Nom de l'organisation"
+                  value={newOrgData.name}
+                  onChange={(e) =>
+                    setNewOrgData({ ...newOrgData, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="row">
+                <label>ID du propriétaire :</label>
+                <input
+                  type="text"
+                  placeholder="ID du propriétaire"
+                  value={newOrgData.owner_id}
+                  onChange={(e) =>
+                    setNewOrgData({ ...newOrgData, owner_id: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="row">
+                <label>ID du logo :</label>
+                <input
+                  type="text"
+                  placeholder="ID du logo"
+                  value={newOrgData.logo_id}
+                  onChange={(e) =>
+                    setNewOrgData({ ...newOrgData, logo_id: e.target.value })
+                  }
+                  required
+                />
+              </div>
               <button type="submit">Créer</button>
             </form>
           </div>
@@ -196,54 +230,175 @@ const Page = () => {
                 onChange={(e) => {
                   const orgId = e.target.value;
                   const org = organizations.find(
-                    (org) => org.id === parseInt(orgId)
+                    (org) => org.id === parseInt(orgId),
                   );
                   setSelectedOrg(org);
                 }}
               >
-                <option value="">Sélectionner une Organisation à Mettre à Jour</option>
+                <option value="">Sélectionner une Organisation</option>
                 {organizations.map((org) => (
                   <option key={org.id} value={org.id}>
                     {org.name}
                   </option>
                 ))}
               </select>
-              <label>Nouveau Nom de l'organisation :</label>
-              <input
-                type="text"
-                placeholder="Nouveau Nom de l'organisation"
-                value={updatedOrgData.name}
-                onChange={(e) =>
-                  setUpdatedOrgData({ ...updatedOrgData, name: e.target.value })
-                }
-              />
-              <label>Nouvel ID du propriétaire :</label>
-              <input
-                type="text"
-                placeholder="Nouvel ID du propriétaire"
-                value={updatedOrgData.owner_id}
-                onChange={(e) =>
-                  setUpdatedOrgData({
-                    ...updatedOrgData,
-                    owner_id: e.target.value,
-                  })
-                }
-              />
-              <label>Nouvel ID du logo :</label>
-              <input
-                type="text"
-                placeholder="Nouvel ID du logo"
-                value={updatedOrgData.logo_id}
-                onChange={(e) =>
-                  setUpdatedOrgData({
-                    ...updatedOrgData,
-                    logo_id: e.target.value,
-                  })
-                }
-              />
+
+              <div className="row">
+                <label>Nouveau Nom de l'organisation :</label>
+                <input
+                  type="text"
+                  placeholder="Nouveau Nom de l'organisation"
+                  value={updatedOrgData.name}
+                  onChange={(e) =>
+                    setUpdatedOrgData({
+                      ...updatedOrgData,
+                      name: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="row">
+                <label>Nouvel ID du propriétaire :</label>
+                <input
+                  type="text"
+                  placeholder="ID du nouveau propriétaire"
+                  value={updatedOrgData.owner_id}
+                  onChange={(e) =>
+                    setUpdatedOrgData({
+                      ...updatedOrgData,
+                      owner_id: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="row">
+                <label>Nouvel ID du logo :</label>
+                <input
+                  type="text"
+                  placeholder="ID du nouveau logo"
+                  value={updatedOrgData.logo_id}
+                  onChange={(e) =>
+                    setUpdatedOrgData({
+                      ...updatedOrgData,
+                      logo_id: e.target.value,
+                    })
+                  }
+                />
+              </div>
               <button type="submit" disabled={!selectedOrg}>
                 Mettre à Jour
               </button>
+            </form>
+
+            {/* Transfer ownership form, with a selector on the org members*/}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCRUD("update");
+              }}
+            >
+              <br />
+              <hr />
+              <br />
+
+              <div className="row">
+                <h2>Transférer la propriété :</h2>
+
+                <select
+                  value={selectedOrg ? selectedOrg.id : ""}
+                  onChange={(e) => {
+                    const orgId = e.target.value;
+                    const org = organizations.find(
+                      (org) => org.id === parseInt(orgId),
+                    );
+                    setSelectedOrg(org);
+                  }}
+                >
+                  <option value="">Sélectionner une Organisation</option>
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="row">
+                <select
+                  value={selectedOrg ? selectedOrg.owner_id : ""}
+                  onChange={(e) =>
+                    setUpdatedOrgData({
+                      ...updatedOrgData,
+                      owner_id: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Sélectionner un nouveau propriétaire</option>
+                  {selectedOrg &&
+                    selectedOrg.members.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.first_name ?? member.name}
+                      </option>
+                    ))}
+                </select>
+                <button type="submit" disabled={!selectedOrg}>
+                  Transférer la propriété
+                </button>
+              </div>
+            </form>
+
+            <br />
+            <hr />
+            <br />
+
+            {/* Add a new member form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCRUD("create-member");
+              }}
+            >
+              {/* Add membars to an organization (POST /api/organization/[id]/members) */}
+              <div className="row">
+                <h2>Ajouter un membre :</h2>
+                <select
+                  value={selectedOrg ? selectedOrg.id : ""}
+                  onChange={(e) => {
+                    const orgId = e.target.value;
+                    const org = organizations.find(
+                      (org) => org.id === parseInt(orgId),
+                    );
+                    setSelectedOrg(org);
+                  }}
+                >
+                  <option value="">Sélectionner une Organisation</option>
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="row">
+                <select
+                  value={newMember.user_id}
+                  onChange={(e) =>
+                    setNewMember({
+                      ...newMember,
+                      user_id: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Sélectionner un nouveau membre</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.first_name ?? user.name}
+                    </option>
+                  ))}
+                </select>
+                <button type="submit" disabled={!selectedOrg}>
+                  Ajouter un membre
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -260,7 +415,7 @@ const Page = () => {
                 setSelectedOrg(org);
               }}
             >
-              <option value="">Sélectionner une Organisation à Supprimer</option>
+              <option value="">Sélectionner une Organisation</option>
               {organizations.map((org) => (
                 <option key={org.id} value={org.id}>
                   {org.name}
@@ -276,6 +431,13 @@ const Page = () => {
           </div>
         </div>
       </div>
+
+      {/* Show organizations json */}
+      <h2>Organizations and Users JSON :</h2>
+      <pre>{JSON.stringify(organizations, null, 2)}</pre>
+      <pre>{JSON.stringify(users, null, 2)}</pre>
+
+      {/* Add some styles */}
       <style jsx>{`
         .page-container {
           padding: 20px;
@@ -291,7 +453,14 @@ const Page = () => {
           padding: 20px;
           border-radius: 10px;
         }
-        input {
+        .row {
+          margin-bottom: 10px;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+        }
+        input,
+        select {
           display: block;
           margin-bottom: 10px;
           color: black;

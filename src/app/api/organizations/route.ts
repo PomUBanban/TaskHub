@@ -2,41 +2,119 @@ import prisma from "@/lib/prisma";
 import { options } from "@/app/api/auth/[...nextauth]/option";
 import { getServerSession } from "next-auth";
 
-export async function GET(request: Request) {
-  const session = await getServerSession(options);
 
-  // The user can only see organizations where they are a member (the users with the role ADMIN can see everything)
-  const data = await prisma.organizations.findMany({
-    where: {
-          owner: {
-            id: session?.user.id,
+/**
+ * Récupère la liste des organisations dans la base de données.
+ * @returns Réponse HTTP avec la liste des organisations
+ */
+export async function GET() {
+  // Fetch organizations with owner, members and logo
+  const organizations = await prisma.organizations.findMany({
+    include: {
+      owner: {
+        select: {
+          id: true,
+          first_name: true,
+          name: true,
+          email_address: true,
+          phone_number: true,
+          profile_picture: {
+            select: {
+              raw_image: true,
+            },
+          },
+        }
+      },
+      OrganizationsMemberships: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              name: true,
+              email_address: true,
+              phone_number: true,
+              profile_picture: {
+                select: {
+                  raw_image: true,
+                },
+              },
+            }
           },
         },
+      },
+      logo: {
+        select: {
+          raw_image: true,
+        }
+      },
+    },
   });
-  return new Response(JSON.stringify(data), {
+
+  // Rename all organizationsMemberships to members
+  organizations.forEach((org) => {
+    org.members = []
+    org.OrganizationsMemberships.forEach((membership) => {
+      org.members.push(membership.user);
+    });
+    delete org.OrganizationsMemberships;
+    delete org.owner.password;
+    delete org.owner_id;
+    delete org.logo_id;
+  });
+
+  return new Response(JSON.stringify(organizations), {
     headers: { "content-type": "application/json" },
   });
 }
 
+/**
+ * Crée une nouvelle organisation dans la base de données.
+ * @param request Requête HTTP
+ * @returns Réponse HTTP avec les données de la nouvelle organisation
+ */
 export async function POST(request: Request) {
-  const requestData = await request.json()
+  const session = await getServerSession(options);
+  if (!session) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
-  const data = await prisma.organizations.create({
+  const requestData = await request.json();
+
+  // Create organization
+  const organization = await prisma.organizations.create({
     data: {
       name: requestData.name,
       logo: {
         connect: {
-          id: requestData.owner_id
-        }
+          id: requestData.logo_id,
+        },
       },
       owner: {
         connect: {
-          id: requestData.logo_id
-        }
-      }
-    }
+          id: session.user.id,
+        },
+      },
+    },
   });
-  return new Response(JSON.stringify(data), {
+
+  // Create membership for owner
+  await prisma.organizationsMemberships.create({
+    data: {
+      user: {
+        connect: {
+          id: session.user.id,
+        },
+      },
+      organization: {
+        connect: {
+          id: organization.id,
+        },
+      },
+    },
+  });
+
+  return new Response(JSON.stringify(organization), {
     headers: { "content-type": "application/json" },
   });
 }

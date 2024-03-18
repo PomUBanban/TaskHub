@@ -10,7 +10,50 @@ type Params = {
   };
 };
 
+export async function GET(request: Request, { params }: Params) {
+  const { id } = params;
+  let org = await prisma.organizations.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+    include: {
+      owner: {
+        select: {
+          id: true,
+          first_name: true,
+          name: true,
+          email_address: true,
+          profile_picture: true,
+        },
+      },
+      // Include OrganizationsMemberships as 'members' 
+      OrganizationsMemberships: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              name: true,
+              email_address: true,
+              profile_picture: true,
+            },
+          },
+        },
+      },
+      logo: true,
+    },
+  });
 
+  org = publicOrg(org);
+
+  if (!org) {
+    return new Response("Organization not found", { status: 404 });
+  }
+
+  return new Response(JSON.stringify(org), {
+    headers: { "content-type": "application/json" },
+  });
+}
 
 /**
  * Met à jour une organisation dans la base de données.
@@ -51,7 +94,7 @@ export async function PUT(request: Request, { params }: Params) {
         : currentOrg.logo_id,
     };
 
-    const data = await prisma.organizations.update({
+    let data = await prisma.organizations.update({
       where: {
         id: parseInt(id as string),
       },
@@ -69,6 +112,8 @@ export async function PUT(request: Request, { params }: Params) {
         },
       },
     });
+
+    data = publicOrg(data);
 
     return new Response(JSON.stringify(data), {
       headers: { "content-type": "application/json" },
@@ -118,4 +163,33 @@ export async function DELETE(request: Request, { params }: Params) {
     console.error("Error deleting organization:", error);
     return new Response("Error deleting organization", { status: 500 });
   }
+}
+
+
+function publicOrg(org: any) {
+  if (!org) {
+    return null;
+  }
+
+  return {
+    id: org.id,
+    name: org.name,
+    owner: org.owner,
+    logo: org.logo,
+    members: org.OrganizationsMemberships.map((member: any) => publicUser(member.user)),
+  };
+}
+
+function publicUser(user: any) {
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    first_name: user.first_name,
+    name: user.name,
+    email_address: user.email_address,
+    profile_picture: user.profile_picture,
+  };
 }
