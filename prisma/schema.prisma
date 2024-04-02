@@ -27,6 +27,7 @@ model Users {
   email_address      String  @unique
   password           String?
   profile_picture_id Int?    @unique
+  first_connection   Boolean @default(true)
   role               Role    @default(USER)
 
   profile_picture Images? @relation(fields: [profile_picture_id], references: [id])

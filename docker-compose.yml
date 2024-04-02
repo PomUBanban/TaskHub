@@ -5,16 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-        - PORT=3000
-        - DATABASE_URL=mysql://root:root@db:3306/database
-        - NEXTAUTH_SECRET=gs0UYk1IEU_n2eCUR3xyIAZwyDnKc39jUyRfOpEp4H15b1Iy0oodD2DPNuWVMFeTCxFpf_QALV8aqMzL8dyYjg
-        - GITHUB_ID=549b7dbcefc59fe4a7e9
-        - GITHUB_SECRET=0330885dc2de08f128ca8f675122f1d13572d706
+    restart: on-failure
+
     ports:
       - "3000:3000"
     volumes:
       - .:/usr/TaskHub
+
   db:
     image: mysql:latest
     environment:
@@ -26,5 +23,6 @@ services:
       - db_data:/var/lib/mysql
     ports:
       - "3306:3306"
+
 volumes:
   db_data:

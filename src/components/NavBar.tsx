@@ -39,7 +39,8 @@ const NavBar = (props: Props) => {
       </div>
       <div className={NavBarResponsiveMenu()}>
         <div>Accueil</div>
-        <div>Menu</div>
+        <div>Mes Boards</div>
+        {/* TODO remplace Menu */}
         <div>Menu</div>
         {session?.user ? (
           <Link
@@ -55,7 +56,10 @@ const NavBar = (props: Props) => {
             />
           </Link>
         ) : (
-          <div className="bg-[#02394A] rounded-xl p-2">Se connecter</div>
+          // change url
+          <Link href="/api/auth/signin" className="bg-[#02394A] rounded-xl p-2">
+            Se connecter
+          </Link>
         )}
       </div>
       <div

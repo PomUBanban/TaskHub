@@ -17,6 +17,7 @@ export interface User extends U {
   phone_number: ?string;
   image_url: string;
   role: "ADMIN" | "USER";
+  first_connection: boolean;
 }
 
 export interface Session {
