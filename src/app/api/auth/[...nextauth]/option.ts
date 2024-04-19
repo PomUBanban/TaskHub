@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import PrismaAdapter from "@/lib/PrismaAdapter";
+import { User as U } from "@/types";
 import type { NextAuthOptions, Session, User } from "next-auth";
-
 import CredentialProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 
@@ -43,8 +43,13 @@ export const options: NextAuthOptions = {
 
   callbacks: {
     async session({ session, user }: { session: Session; user?: User }) {
-      if (user) {
-        session.user = user;
+      const user1 = user as unknown as U;
+      if (user1) {
+        const img = await prisma.images.findFirst({
+          where: { id: user1.profile_picture_id },
+        });
+        user1.image_url = img?.raw_image ?? "";
+        session.user = user1;
       }
       return session;
     },
