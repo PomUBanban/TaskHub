@@ -18,10 +18,6 @@ export async function POST(request: Request, { params }: Params) {
   const requestData = await request.json();
   const user_id = requestData.user_id;
 
-  console.log('---------------------------------');
-  console.log(requestData);
-  console.log('---------------------------------');
-
   const user = await prisma.organizationsMemberships.findFirst({
     where: {
       organizationId: parseInt(id),

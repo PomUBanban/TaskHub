@@ -2,7 +2,6 @@ import prisma from "@/lib/prisma";
 import { options } from "@/app/api/auth/[...nextauth]/option";
 import { getServerSession } from "next-auth";
 
-
 /**
  * Récupère la liste des organisations dans la base de données.
  * @returns Réponse HTTP avec la liste des organisations
@@ -23,7 +22,7 @@ export async function GET() {
               raw_image: true,
             },
           },
-        }
+        },
       },
       OrganizationsMemberships: {
         include: {
@@ -39,21 +38,21 @@ export async function GET() {
                   raw_image: true,
                 },
               },
-            }
+            },
           },
         },
       },
       logo: {
         select: {
           raw_image: true,
-        }
+        },
       },
     },
   });
 
   // Rename all organizationsMemberships to members
   organizations.forEach((org) => {
-    org.members = []
+    org.members = [];
     org.OrganizationsMemberships.forEach((membership) => {
       org.members.push(membership.user);
     });
@@ -85,14 +84,20 @@ export async function POST(request: Request) {
   const organization = await prisma.organizations.create({
     data: {
       name: requestData.name,
-      logo: {
-        connect: {
-          id: requestData.logo_id,
-        },
-      },
+      logo: requestData.logo_id
+        ? {
+            connect: {
+              id: requestData.logo_id,
+            },
+          }
+        : {
+            create: {
+              raw_image: requestData.logo,
+            },
+          },
       owner: {
         connect: {
-          id: session.user.id,
+          id: requestData.owner_id ?? session.user.id,
         },
       },
     },
@@ -103,7 +108,7 @@ export async function POST(request: Request) {
     data: {
       user: {
         connect: {
-          id: session.user.id,
+          id: requestData.owner ?? session.user.id,
         },
       },
       organization: {

@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: Params) {
           profile_picture: true,
         },
       },
-      // Include OrganizationsMemberships as 'members' 
+      // Include OrganizationsMemberships as 'members'
       OrganizationsMemberships: {
         include: {
           user: {
@@ -100,11 +100,17 @@ export async function PUT(request: Request, { params }: Params) {
       },
       data: {
         name: newOrgData.name,
-        logo: {
-          connect: {
-            id: newOrgData.logo_id,
-          },
-        },
+        logo: newOrgData.logo_id
+          ? {
+              connect: {
+                id: newOrgData.logo_id,
+              },
+            }
+          : {
+              create: {
+                raw_image: requestData.logo,
+              },
+            },
         owner: {
           connect: {
             id: newOrgData.owner_id,
@@ -118,7 +124,6 @@ export async function PUT(request: Request, { params }: Params) {
     return new Response(JSON.stringify(data), {
       headers: { "content-type": "application/json" },
     });
-
   } catch (error) {
     console.error("Error updating organization:", error);
     return new Response("Error updating organization", { status: 500 });
@@ -165,7 +170,6 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 }
 
-
 function publicOrg(org: any) {
   if (!org) {
     return null;
@@ -176,7 +180,9 @@ function publicOrg(org: any) {
     name: org.name,
     owner: org.owner,
     logo: org.logo,
-    members: org.OrganizationsMemberships.map((member: any) => publicUser(member.user)),
+    members: org.OrganizationsMemberships.map((member: any) =>
+      publicUser(member.user),
+    ),
   };
 }
 

@@ -10,11 +10,13 @@ const Page = () => {
     name: "",
     owner_id: "",
     logo_id: "",
+    logo: "",
   });
   const [updatedOrgData, setUpdatedOrgData] = useState({
     name: "",
     owner_id: "",
     logo_id: "",
+    logo: "",
   });
   const [newMember, setNewMember] = useState({
     user_id: "",
@@ -68,6 +70,7 @@ const Page = () => {
             name: "",
             owner_id: "",
             logo_id: "",
+            logo: "",
           });
           break;
 
@@ -201,13 +204,12 @@ const Page = () => {
                 />
               </div>
               <div className="row">
-                <label>ID du logo :</label>
+                <label>Logo :</label>
                 <input
-                  type="text"
-                  placeholder="ID du logo"
-                  value={newOrgData.logo_id}
+                  type="file"
+                  value={newOrgData.logo}
                   onChange={(e) =>
-                    setNewOrgData({ ...newOrgData, logo_id: e.target.value })
+                    setNewOrgData({ ...newOrgData, logo: e.target.value })
                   }
                   required
                 />
@@ -272,11 +274,10 @@ const Page = () => {
                 />
               </div>
               <div className="row">
-                <label>Nouvel ID du logo :</label>
+                <label>Nouveau logo :</label>
                 <input
-                  type="text"
-                  placeholder="ID du nouveau logo"
-                  value={updatedOrgData.logo_id}
+                  type="file"
+                 value={updatedOrgData.logo}
                   onChange={(e) =>
                     setUpdatedOrgData({
                       ...updatedOrgData,
