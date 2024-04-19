@@ -44,13 +44,9 @@ export async function GET(request: Request, { params }: Params) {
     },
   });
 
-  org = publicOrg(org);
-
   if (!org) {
     return new Response("Organization not found", { status: 404 });
-  }
-
-  return new Response(JSON.stringify(org), {
+  } else return new Response(JSON.stringify(publicOrg(org)), {
     headers: { "content-type": "application/json" },
   });
 }
@@ -118,10 +114,8 @@ export async function PUT(request: Request, { params }: Params) {
         },
       },
     });
-
-    data = publicOrg(data);
-
-    return new Response(JSON.stringify(data), {
+    
+    if (data) return new Response(JSON.stringify(publicOrg(data)), {
       headers: { "content-type": "application/json" },
     });
   } catch (error) {

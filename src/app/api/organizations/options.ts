@@ -14,8 +14,8 @@ export const options = {
         authorize: async (credentials) => {
             const user = await prisma.user.findFirst({
             where: {
-                username: credentials.username,
-                password: credentials.password,
+                username: credentials?.username,
+                password: credentials?.password,
             },
             });
             if (user) {
