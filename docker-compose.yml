@@ -1,16 +1,16 @@
 version: "3"
 
 services:
-  taskhub:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: on-failure
-
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/usr/TaskHub
+  #  taskhub:
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    restart: on-failure
+  #
+  #    ports:
+  #      - "3000:3000"
+  #    volumes:
+  #      - .:/usr/TaskHub
 
   db:
     image: mysql:latest
