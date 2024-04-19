@@ -1,27 +1,29 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import ErrorMessage from "./ErrorMessage"; // Component to display errors
+import ErrorMessage from "./ErrorMessage";
+import { Organizations, Users, Images } from "@prisma/client"; // Component to display errors
+
+interface Org extends Organizations {
+  owner: Users;
+  logo: Images;
+  members: Users[];
+}
 
 const Page = () => {
-  const [organizations, setOrganizations] = useState([]);
-  const [selectedOrg, setSelectedOrg] = useState(null);
-  const [users, setUsers] = useState([]);
+  const [organizations, setOrganizations] = useState<Org[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<null | Org>(null);
+  const [users, setUsers] = useState<Users[]>([]);
   const [newOrgData, setNewOrgData] = useState({
     name: "",
     owner_id: "",
     logo_id: "",
     logo: "",
   });
-  const [updatedOrgData, setUpdatedOrgData] = useState({
-    name: "",
-    owner_id: "",
-    logo_id: "",
-    logo: "",
-  });
+  const [updatedOrgData, setUpdatedOrgData] = useState<Org | null>(null);
   const [newMember, setNewMember] = useState({
     user_id: "",
   });
-  const [error, setError] = useState(null); // New state to handle errors
+  const [error, setError] = useState<null | string>(null); // New state to handle errors
 
   // Fetch organizations data on page load
   useEffect(() => {
@@ -42,7 +44,7 @@ const Page = () => {
     fetchOrganizations();
   }, []);
 
-  const handleCRUD = async (action) => {
+  const handleCRUD = async (action: string) => {
     try {
       switch (action) {
         case "create":
@@ -76,7 +78,7 @@ const Page = () => {
 
         case "create-member":
           // Perform POST request using newMember and selectedOrg
-          await fetch(`/api/organizations/${selectedOrg.id}/members`, {
+          await fetch(`/api/organizations/${selectedOrg?.id}/members`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -102,8 +104,8 @@ const Page = () => {
             // Parse owner_id and logo_id to integers
             const updatedOrgDataWithIntegers = {
               ...updatedOrgData,
-              owner_id: parseInt(updatedOrgData.owner_id),
-              logo_id: parseInt(updatedOrgData.logo_id),
+              owner_id: updatedOrgData?.owner_id,
+              logo_id: updatedOrgData?.logo_id,
             };
 
             // Perform PUT request using selectedOrg and updatedOrgDataWithIntegers
@@ -119,11 +121,7 @@ const Page = () => {
             const updatedData = await updatedResponse.json();
             setOrganizations(updatedData);
             // Reset updatedOrgData after updated organization
-            setUpdatedOrgData({
-              name: "",
-              owner_id: "",
-              logo_id: "",
-            });
+            setUpdatedOrgData(null);
           }
           break;
 
@@ -234,11 +232,11 @@ const Page = () => {
                   const org = organizations.find(
                     (org) => org.id === parseInt(orgId),
                   );
-                  setSelectedOrg(org);
+                  if (org) setSelectedOrg(org);
                 }}
               >
                 <option value="">Sélectionner une Organisation</option>
-                {organizations.map((org) => (
+                {organizations.map((org: Organizations) => (
                   <option key={org.id} value={org.id}>
                     {org.name}
                   </option>
@@ -250,12 +248,13 @@ const Page = () => {
                 <input
                   type="text"
                   placeholder="Nouveau Nom de l'organisation"
-                  value={updatedOrgData.name}
+                  value={updatedOrgData?.name}
                   onChange={(e) =>
-                    setUpdatedOrgData({
-                      ...updatedOrgData,
-                      name: e.target.value,
-                    })
+                    setUpdatedOrgData(
+                      updatedOrgData
+                        ? { ...updatedOrgData, name: e.target.value }
+                        : null,
+                    )
                   }
                 />
               </div>
@@ -264,12 +263,16 @@ const Page = () => {
                 <input
                   type="text"
                   placeholder="ID du nouveau propriétaire"
-                  value={updatedOrgData.owner_id}
+                  value={updatedOrgData?.owner_id}
                   onChange={(e) =>
-                    setUpdatedOrgData({
-                      ...updatedOrgData,
-                      owner_id: e.target.value,
-                    })
+                    setUpdatedOrgData(
+                      updatedOrgData
+                        ? {
+                            ...updatedOrgData,
+                            owner_id: parseInt(e.target.value),
+                          }
+                        : null,
+                    )
                   }
                 />
               </div>
@@ -277,12 +280,16 @@ const Page = () => {
                 <label>Nouveau logo :</label>
                 <input
                   type="file"
-                 value={updatedOrgData.logo}
+                  value={updatedOrgData?.logo_id}
                   onChange={(e) =>
-                    setUpdatedOrgData({
-                      ...updatedOrgData,
-                      logo_id: e.target.value,
-                    })
+                    setUpdatedOrgData(
+                      updatedOrgData
+                        ? {
+                            ...updatedOrgData,
+                            logo_id: parseInt(e.target.value),
+                          }
+                        : null,
+                    )
                   }
                 />
               </div>
@@ -312,7 +319,7 @@ const Page = () => {
                     const org = organizations.find(
                       (org) => org.id === parseInt(orgId),
                     );
-                    setSelectedOrg(org);
+                    if (org) setSelectedOrg(org);
                   }}
                 >
                   <option value="">Sélectionner une Organisation</option>
@@ -327,10 +334,14 @@ const Page = () => {
                 <select
                   value={selectedOrg ? selectedOrg.owner_id : ""}
                   onChange={(e) =>
-                    setUpdatedOrgData({
-                      ...updatedOrgData,
-                      owner_id: e.target.value,
-                    })
+                    setUpdatedOrgData(
+                      updatedOrgData
+                        ? {
+                            ...updatedOrgData,
+                            owner_id: parseInt(e.target.value),
+                          }
+                        : null,
+                    )
                   }
                 >
                   <option value="">Sélectionner un nouveau propriétaire</option>
@@ -368,7 +379,7 @@ const Page = () => {
                     const org = organizations.find(
                       (org) => org.id === parseInt(orgId),
                     );
-                    setSelectedOrg(org);
+                    if (org) setSelectedOrg(org);
                   }}
                 >
                   <option value="">Sélectionner une Organisation</option>
@@ -413,7 +424,7 @@ const Page = () => {
                 const org = organizations.find(
                   (org) => org.id === parseInt(orgId),
                 );
-                setSelectedOrg(org);
+                if (org) setSelectedOrg(org);
               }}
             >
               <option value="">Sélectionner une Organisation</option>
@@ -443,23 +454,27 @@ const Page = () => {
         .page-container {
           padding: 20px;
         }
+
         .grid-container {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           grid-template-rows: repeat(2, 1fr);
           gap: 20px;
         }
+
         .grid-item {
           background-color: orange;
           padding: 20px;
           border-radius: 10px;
         }
+
         .row {
           margin-bottom: 10px;
           display: flex;
           flex-direction: row;
           justify-content: space-between;
         }
+
         input,
         select {
           display: block;
