@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { options } from "@/app/api/auth/[...nextauth]/option";
 import { getServerSession } from "next-auth";
+import { Session } from "@/types";
 
 type Params = {
   params: {
@@ -26,6 +27,7 @@ export async function GET(request: Request, { params }: Params) {
           profile_picture: true,
         },
       },
+      // @ts-ignore
       // Include OrganizationsMemberships as 'members'
       OrganizationsMemberships: {
         include: {
@@ -58,7 +60,7 @@ export async function GET(request: Request, { params }: Params) {
  * @returns Réponse HTTP avec les données mises à jour de l'organisation
  */
 export async function PUT(request: Request, { params }: Params) {
-  const session = await getServerSession(options);
+  const session = await getServerSession(options) as unknown as Session;
   const requestData = await request.json();
   const { id } = params;
 
@@ -137,7 +139,7 @@ export async function DELETE(request: Request, { params }: Params) {
       id: parseInt(id as string),
     },
   });
-  const session = await getServerSession(options);
+  const session = (await getServerSession(options)) as unknown as Session;
 
   try {
     // Vérifier si l'organisation existe

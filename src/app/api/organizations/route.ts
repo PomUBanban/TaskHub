@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { options } from "@/app/api/auth/[...nextauth]/option";
 import { getServerSession } from "next-auth";
+import { Session, Organizations, PublicOrganizations } from "@/types";
 
 /**
  * Récupère la liste des organisations dans la base de données.
@@ -8,7 +9,7 @@ import { getServerSession } from "next-auth";
  */
 export async function GET() {
   // Fetch organizations with owner, members and logo
-  const organizations = await prisma.organizations.findMany({
+  const organizations: Organizations[] = (await prisma.organizations.findMany({
     include: {
       owner: {
         select: {
@@ -16,14 +17,11 @@ export async function GET() {
           first_name: true,
           name: true,
           email_address: true,
-          phone_number: true,
-          profile_picture: {
-            select: {
-              raw_image: true,
-            },
-          },
+          profile_picture: true,
         },
       },
+      // @ts-ignore
+      // Include OrganizationsMemberships as 'members'
       OrganizationsMemberships: {
         include: {
           user: {
@@ -32,37 +30,39 @@ export async function GET() {
               first_name: true,
               name: true,
               email_address: true,
-              phone_number: true,
-              profile_picture: {
-                select: {
-                  raw_image: true,
-                },
-              },
+              profile_picture: true,
             },
           },
         },
       },
-      logo: {
-        select: {
-          raw_image: true,
-        },
-      },
+      logo: true,
     },
-  });
+  })) as unknown as Organizations[];
 
-  // Rename all organizationsMemberships to members
-  organizations.forEach((org) => {
-    org.members = [];
-    org.OrganizationsMemberships.forEach((membership) => {
-      org.members.push(membership.user);
+  const publicOrganizations: PublicOrganizations[] = organizations.map((org: Organizations) => {
+    const membres = org?.OrganizationsMemberships?.map((member) => {
+      return {
+        id: member.id,
+        first_name: member.first_name,
+        name: member.name,
+        email_address: member.email_address,
+        phone_number: member.phone_number,
+        profile_picture: {
+          raw_image: member.profile_picture.raw_image,
+        },
+      };
     });
-    delete org.OrganizationsMemberships;
-    delete org.owner.password;
-    delete org.owner_id;
-    delete org.logo_id;
+
+    return {
+      id: org.id,
+      name: org.name,
+      logo: org.logo,
+      owner: org.owner,
+      members: membres ?? [],
+    };
   });
 
-  return new Response(JSON.stringify(organizations), {
+  return new Response(JSON.stringify(publicOrganizations), {
     headers: { "content-type": "application/json" },
   });
 }
@@ -73,7 +73,7 @@ export async function GET() {
  * @returns Réponse HTTP avec les données de la nouvelle organisation
  */
 export async function POST(request: Request) {
-  const session = await getServerSession(options);
+  const session = (await getServerSession(options)) as unknown as Session;
   if (!session) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
           },
       owner: {
         connect: {
-          id: requestData.owner_id ?? session.user.id,
+          id: requestData.owner_id ?? session.user?.id,
         },
       },
     },
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     data: {
       user: {
         connect: {
-          id: requestData.owner ?? session.user.id,
+          id: requestData.owner_id ?? session.user?.id,
         },
       },
       organization: {
