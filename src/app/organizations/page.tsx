@@ -1,17 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import ErrorMessage from "./ErrorMessage";
-import { Organizations, Users, Images } from "@prisma/client"; // Component to display errors
+import { Users, Images } from "@prisma/client"; // Component to display errors
+import { PublicOrganizations as Organizations } from "@/types";
 
-interface Org extends Organizations {
-  owner: Users;
-  logo: Images;
-  members: Users[];
-}
 
 const Page = () => {
-  const [organizations, setOrganizations] = useState<Org[]>([]);
-  const [selectedOrg, setSelectedOrg] = useState<null | Org>(null);
+  const [organizations, setOrganizations] = useState<Organizations[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<null | Organizations>(null);
   const [users, setUsers] = useState<Users[]>([]);
   const [newOrgData, setNewOrgData] = useState({
     name: "",
@@ -19,7 +15,7 @@ const Page = () => {
     logo_id: "",
     logo: "",
   });
-  const [updatedOrgData, setUpdatedOrgData] = useState<Org | null>(null);
+  const [updatedOrgData, setUpdatedOrgData] = useState<Organizations | null>(null);
   const [newMember, setNewMember] = useState({
     user_id: "",
   });
@@ -104,8 +100,8 @@ const Page = () => {
             // Parse owner_id and logo_id to integers
             const updatedOrgDataWithIntegers = {
               ...updatedOrgData,
-              owner_id: updatedOrgData?.owner_id,
-              logo_id: updatedOrgData?.logo_id,
+              owner_id: updatedOrgData?.owner.id,
+              logo_id: updatedOrgData?.logo.id,
             };
 
             // Perform PUT request using selectedOrg and updatedOrgDataWithIntegers
@@ -263,15 +259,18 @@ const Page = () => {
                 <input
                   type="text"
                   placeholder="ID du nouveau propriétaire"
-                  value={updatedOrgData?.owner_id}
+                  value={updatedOrgData?.owner.id}
                   onChange={(e) =>
-                    setUpdatedOrgData(
-                      updatedOrgData
+                    setUpdatedOrgData((prevState) =>
+                      prevState
                         ? {
-                            ...updatedOrgData,
-                            owner_id: parseInt(e.target.value),
+                            ...prevState,
+                            owner: {
+                              ...prevState.owner,
+                              id: parseInt(e.target.value),
+                            },
                           }
-                        : null,
+                        : null
                     )
                   }
                 />
@@ -280,15 +279,15 @@ const Page = () => {
                 <label>Nouveau logo :</label>
                 <input
                   type="file"
-                  value={updatedOrgData?.logo_id}
+                  value={updatedOrgData?.logo.id}
                   onChange={(e) =>
-                    setUpdatedOrgData(
-                      updatedOrgData
+                    setUpdatedOrgData((prevState) =>
+                      prevState
                         ? {
-                            ...updatedOrgData,
+                            ...prevState,
                             logo_id: parseInt(e.target.value),
                           }
-                        : null,
+                        : null
                     )
                   }
                 />
@@ -332,15 +331,18 @@ const Page = () => {
               </div>
               <div className="row">
                 <select
-                  value={selectedOrg ? selectedOrg.owner_id : ""}
+                  value={selectedOrg ? selectedOrg.owner.id : ""}
                   onChange={(e) =>
-                    setUpdatedOrgData(
-                      updatedOrgData
+                    setUpdatedOrgData((prevState) =>
+                      prevState
                         ? {
-                            ...updatedOrgData,
-                            owner_id: parseInt(e.target.value),
+                            ...prevState,
+                            owner: {
+                              ...prevState.owner,
+                              id: parseInt(e.target.value),
+                            },
                           }
-                        : null,
+                        : null
                     )
                   }
                 >

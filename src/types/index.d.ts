@@ -51,6 +51,7 @@ export interface Organizations extends Orgs {
   }[];
   logo_id: number;
   logo: {
+    id: number;
     raw_image: string;
   };
 };
@@ -79,6 +80,7 @@ export type PublicOrganizations = {
     };
   }[];
   logo: {
+    id: number;
     raw_image: string;
   };
 };

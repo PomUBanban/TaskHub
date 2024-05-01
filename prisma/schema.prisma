@@ -14,8 +14,8 @@ model Images {
 
   organizations Organizations[]
   Users         Users?
-  BoardsIcon    Boards[]       @relation("BoardsIcon")
-  BoardsBg      Boards[]       @relation("BoardsBg")
+  BoardsIcon    Boards[]        @relation("BoardsIcon")
+  BoardsBg      Boards[]        @relation("BoardsBg")
   TasksImages   TasksImages[]
 }
 
