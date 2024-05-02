@@ -1,8 +1,8 @@
 // route.tsx
-
 import prisma from "@/lib/prisma";
 import { options } from "@/app/api/auth/[...nextauth]/option";
 import { getServerSession } from "next-auth";
+import { Session } from "@/types";
 
 type Params = {
   params: {
@@ -46,9 +46,10 @@ export async function GET(request: Request, { params }: Params) {
 
   if (!org) {
     return new Response("Organization not found", { status: 404 });
-  } else return new Response(JSON.stringify(publicOrg(org)), {
-    headers: { "content-type": "application/json" },
-  });
+  } else
+    return new Response(JSON.stringify(publicOrg(org)), {
+      headers: { "content-type": "application/json" },
+    });
 }
 
 /**
@@ -58,7 +59,7 @@ export async function GET(request: Request, { params }: Params) {
  * @returns Réponse HTTP avec les données mises à jour de l'organisation
  */
 export async function PUT(request: Request, { params }: Params) {
-  const session = await getServerSession(options);
+  let session = (await getServerSession(options)) as unknown as Session | null;
   const requestData = await request.json();
   const { id } = params;
 
@@ -114,10 +115,11 @@ export async function PUT(request: Request, { params }: Params) {
         },
       },
     });
-    
-    if (data) return new Response(JSON.stringify(publicOrg(data)), {
-      headers: { "content-type": "application/json" },
-    });
+
+    if (data)
+      return new Response(JSON.stringify(publicOrg(data)), {
+        headers: { "content-type": "application/json" },
+      });
   } catch (error) {
     console.error("Error updating organization:", error);
     return new Response("Error updating organization", { status: 500 });
@@ -137,7 +139,9 @@ export async function DELETE(request: Request, { params }: Params) {
       id: parseInt(id as string),
     },
   });
-  const session = await getServerSession(options);
+  const session = (await getServerSession(
+    options,
+  )) as unknown as Session | null;
 
   try {
     // Vérifier si l'organisation existe

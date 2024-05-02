@@ -12,7 +12,6 @@ type Params = {
 
 // Add member to organization
 export async function POST(request: Request, { params }: Params) {
-  const session = await getServerSession({ req: request });
   const { id } = params;
 
   const requestData = await request.json();
@@ -22,7 +21,7 @@ export async function POST(request: Request, { params }: Params) {
     where: {
       organizationId: parseInt(id),
       userId: parseInt(user_id),
-    }
+    },
   });
 
   if (user) {
