@@ -23,3 +23,14 @@ export interface User extends U {
 export interface Session {
   user: User;
 }
+
+export interface Boards {
+  id: number;
+  name: string;
+  organization_id: number;
+  icon_id: number;
+  background_id: number;
+  organization: Organizations;
+  icon: Images;
+  background: Images;
+}

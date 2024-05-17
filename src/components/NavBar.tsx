@@ -34,12 +34,11 @@ const NavBar = (props: Props) => {
 
   return (
     <div className="flex w-screen justify-between bg-blue-500  p-5 items-center">
-      <div>
-        <h1 className="font-bold text-4xl ">TaskHub Logo</h1>
-      </div>
+      <Link href="/">
+        <h1 className="font-bold text-4xl ">TaskHub</h1>
+      </Link>
       <div className={NavBarResponsiveMenu()}>
-        <div>Accueil</div>
-        <div>Mes Boards</div>
+        <Link href="/boards">Mes Boards</Link>
         {/* TODO remplace Menu */}
         <div>Menu</div>
         {session?.user ? (
