@@ -51,7 +51,7 @@ model Organizations {
   owner Users  @relation(fields: [owner_id], references: [id])
 
   Groups                   Groups?
-  Boards                   Boards?
+  Boards                   Boards[]
   OrganizationsMemberships OrganizationsMemberships[]
 }
 
@@ -62,22 +62,20 @@ model Groups {
   name            String
 
   chief             Users               @relation(fields: [chief_id], references: [id])
-  organization      Organizations       @relation(fields: [organization_id], references: [id])
+  organization      Organizations       @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   GroupsMemberships GroupsMemberships[]
 }
 
 model Boards {
   id              Int    @id @default(autoincrement())
-  organization_id Int    @unique
+  organization_id Int    
   name            String
-  icon_id         Int    @unique
-  background_id   Int    @unique
-
-  organization Organizations @relation(fields: [organization_id], references: [id])
-  icon         Images        @relation(fields: [icon_id], references: [id], name: "BoardsIcon")
-  background   Images        @relation(fields: [background_id], references: [id], name: "BoardsBg")
-
-  TaskGroups TaskGroups[]
+  icon_id         Int
+  background_id   Int
+  organization    Organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  icon            Images        @relation(fields: [icon_id], references: [id], name: "BoardsIcon")
+  background      Images        @relation(fields: [background_id], references: [id], name: "BoardsBg")
+  TaskGroups      TaskGroups[]
 }
 
 model TaskGroups {
@@ -135,7 +133,7 @@ model OrganizationsMemberships {
   organizationId Int
   userId         Int
 
-  organization Organizations @relation(fields: [organizationId], references: [id])
+  organization Organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user         Users         @relation(fields: [userId], references: [id])
 }
 

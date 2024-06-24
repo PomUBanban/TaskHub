@@ -116,10 +116,9 @@ export async function PUT(request: Request, { params }: Params) {
       },
     });
 
-    if (data)
-      return new Response(JSON.stringify(publicOrg(data)), {
-        headers: { "content-type": "application/json" },
-      });
+    if (data) {
+      return await GET(request, { params });
+    }
   } catch (error) {
     console.error("Error updating organization:", error);
     return new Response("Error updating organization", { status: 500 });

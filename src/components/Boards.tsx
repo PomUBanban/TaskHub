@@ -1,21 +1,29 @@
-import { Organizations } from "@prisma/client";
+import { Boards as BoardsType } from "../types";
 import React from "react";
 
 type props = {
-  organisation: Organizations;
+  board: BoardsType;
 };
 
-export default function Boards({ organisation }: props) {
-  /* TODO: change boards name */
+export default function Boards({ board }: props) {
   return (
     <>
-      <h1 className="text-3xl">{organisation.name}</h1>
+      <h1 className="text-3xl">{board.name}</h1>
       <div className="bg-[#4D8DC4] flex w-full rounded-lg p-4">
         <div className="flex flex-col w-[20%] items-center text-xl">
-          <div className="flex bg-gray-500 aspect-[16/9] w-full rounded-lg justify-center items-center">
-            {organisation.logo_id}
-          </div>
-          <div>{organisation.name}</div>
+          {/* Include board icon if exists */}
+          {board.icon_id ? (
+            <img
+              src={board.icon.raw_image}
+              alt={board.icon.raw_image}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="flex justify-center items-center w-full h-full text-4xl text-white">
+              <span>📋</span>
+            </div>
+          )}
+          <div>{board.name}</div>
         </div>
       </div>
     </>

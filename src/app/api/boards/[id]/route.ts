@@ -12,17 +12,21 @@
 //   TaskGroups TaskGroups[]
 // }
 
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { options } from "@/app/api/auth/[...nextauth]/option";
-import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 
-const GET = async (res: NextResponse) => {
-  // Check if user have the access to the boards
-  const session = await getServerSession(options);
-  if (!session) return Response.json("Unauthorized", { status: 401 });
+type Params = {
+  params: {
+    id: string;
+  };
+};
 
-  const boards = await prisma.boards.findMany({
+const GET = async (res: NextResponse, { params }: Params) => {
+  const { id } = params;
+  const board = await prisma.boards.findUnique({
+    where: {
+      id: parseInt(id as string),
+    },
     include: {
       organization: true,
       icon: true,
@@ -30,24 +34,31 @@ const GET = async (res: NextResponse) => {
     },
   });
 
-  if (!boards) return new Response("No boards found", { status: 404 });
-  return Response.json(boards);
+  if (!board) return new Response("Board not found", { status: 404 });
+  return Response.json(board);
 };
 
-const POST = async (res: NextResponse) => {
-  const session = await getServerSession(options);
-  if (!session) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+const DELETE = async (res: NextResponse, { params }: Params) => {
+  const { id } = params;
+  const board = await prisma.boards.delete({
+    where: {
+      id: parseInt(id as string),
+    },
+  });
 
+  return Response.json(board);
+};
+
+const PUT = async (res: NextResponse, { params }: Params) => {
+  const { id } = params;
   const requestData = await res.json();
 
-  const newBoard = await prisma.boards.create({
+  const updatedBoard = await prisma.boards.update({
+    where: {
+      id: parseInt(id as string),
+    },
     data: {
       name: requestData.name,
-      organization: {
-        connect: { id: requestData.organization_id },
-      },
       icon: requestData.icon_id
         ? { connect: { id: requestData.icon_id } }
         : { create: { raw_image: requestData.icon } },
@@ -57,7 +68,7 @@ const POST = async (res: NextResponse) => {
     },
   });
 
-  return NextResponse.json(newBoard);
+  return Response.json(updatedBoard);
 };
 
-export { GET, POST };
+export { GET, DELETE, PUT };
