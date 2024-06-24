@@ -78,26 +78,26 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const requestData = await request.json();
+  const { name, logo_id, logo, owner_id, owner } = await request.json();
 
   // Create organization
   const organization = await prisma.organizations.create({
     data: {
-      name: requestData.name,
-      logo: requestData.logo_id
+      name: name,
+      logo: logo_id
         ? {
             connect: {
-              id: requestData.logo_id,
+              id: logo_id,
             },
           }
         : {
             create: {
-              raw_image: requestData.logo,
+              raw_image: logo,
             },
           },
       owner: {
         connect: {
-          id: requestData.owner_id ?? session.user.id,
+          id: owner_id ?? session.user.id,
         },
       },
     },
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     data: {
       user: {
         connect: {
-          id: requestData.owner ?? session.user.id,
+          id: owner ?? session.user.id,
         },
       },
       organization: {

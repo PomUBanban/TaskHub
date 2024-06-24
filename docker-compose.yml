@@ -1,19 +1,25 @@
 version: "3"
 
 services:
-  #  taskhub:
-  #    build:
-  #      context: .
-  #      dockerfile: Dockerfile
-  #    restart: on-failure
-  #
-  #    ports:
-  #      - "3000:3000"
-  #    volumes:
-  #      - .:/usr/TaskHub
+  taskhub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/TaskHub
 
   db:
     image: mysql:latest
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 1s
+      timeout: 5s
+      retries: 300
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: database
