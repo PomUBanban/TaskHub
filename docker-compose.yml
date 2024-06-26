@@ -10,9 +10,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
+      - ./:/usr/TaskHub
       - /usr/TaskHub/node_modules
     command: >
-      sh -c "npx prisma generate && npx prisma db push && npm run build && npm run start"
+      sh -c "npx prisma generate && npx prisma db push && npm run dev"
 
   db:
     image: mysql:latest

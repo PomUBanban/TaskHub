@@ -75,7 +75,7 @@ services:
   db:
     image: mysql:latest
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 1s
       timeout: 5s
       retries: 300
@@ -91,7 +91,6 @@ services:
 
 volumes:
   db_data:
-
 ```
 
 ### Scripts NPM
@@ -100,36 +99,36 @@ volumes:
   Remplacer les ligne suivant du docker-compose
 
 ```yaml
-    image: albanagisa/taskhub
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: on-failure
-    ports:
-      - "3000:3000"
-    volumes:
-      - /usr/TaskHub/node_modules
-    command: >
-      sh -c "npx prisma generate && npx prisma db push && npm run build && npm run start"
+image: albanagisa/taskhub
+depends_on:
+  db:
+    condition: service_healthy
+restart: on-failure
+ports:
+  - "3000:3000"
+volumes:
+  - /usr/TaskHub/node_modules
+command: >
+  sh -c "npx prisma generate && npx prisma db push && npm run build && npm run start"
 ```
 
 par
 
 ```yaml
-  build:
-    context: .
-    dockerfile: Dockerfile
-  depends_on:
-    db:
-      condition: service_healthy
-  restart: on-failure
-  ports:
-    - "3000:3000"
-  volumes:
-    - ./:/usr/TaskHub
-    - /usr/TaskHub/node_modules
-  command: >
-    sh -c "npx prisma generate && npx prisma db push && npm run dev"
+build:
+  context: .
+  dockerfile: Dockerfile
+depends_on:
+  db:
+    condition: service_healthy
+restart: on-failure
+ports:
+  - "3000:3000"
+volumes:
+  - ./:/usr/TaskHub
+  - /usr/TaskHub/node_modules
+command: >
+  sh -c "npx prisma generate && npx prisma db push && npm run dev"
 ```
 
 ### Contribuer

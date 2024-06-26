@@ -106,39 +106,37 @@ const Page = ({ params }: { params: { id: string } }) => {
   };
 
   return (
-    <>
-      <div>
+    <div>
+      <div className="flex">
+        <Board data={data} handleDragEnd={handleDragEnd} />
         <div className="flex">
-          <Board data={data} handleDragEnd={handleDragEnd} />
-          <div className="flex">
-            <div className="flex flex-col align-center">
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Creer une liste"
-                className="text-black"
-              />
-              <div className="flex items-center justify-center">
-                <button
-                  className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full cursor-pointer"
-                  onClick={() => {
-                    fetch("/api/boards/" + params.id + "/tasksgroup", {
-                      method: "POST",
-                      body: JSON.stringify({ name }),
-                    }).then(() => {
-                      setUpdate(true);
-                      setName("");
-                    });
-                  }}
-                >
-                  +
-                </button>
-              </div>
+          <div className="flex flex-col align-center">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Creer une liste"
+              className="text-black"
+            />
+            <div className="flex items-center justify-center">
+              <button
+                className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full cursor-pointer"
+                onClick={() => {
+                  fetch("/api/boards/" + params.id + "/tasksgroup", {
+                    method: "POST",
+                    body: JSON.stringify({ name }),
+                  }).then(() => {
+                    setUpdate(true);
+                    setName("");
+                  });
+                }}
+              >
+                +
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
