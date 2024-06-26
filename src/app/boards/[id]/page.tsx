@@ -105,10 +105,22 @@ const Page = ({ params }: { params: { id: string } }) => {
     });
   };
 
+  const handleCardDelete = (cardId: string, laneId: string) => {
+    fetch("/api/boards/" + params.id + "/tasksgroup/task/" + cardId, {
+      method: "DELETE",
+    }).then(() => {
+      setUpdate(true);
+    });
+  };
+
   return (
     <div>
       <div className="flex">
-        <Board data={data} handleDragEnd={handleDragEnd} />
+        <Board
+          data={data}
+          handleDragEnd={handleDragEnd}
+          onCardDelete={handleCardDelete}
+        />
         <div className="flex">
           <div className="flex flex-col align-center">
             <input

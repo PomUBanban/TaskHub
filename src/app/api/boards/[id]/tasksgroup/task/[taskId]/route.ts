@@ -21,4 +21,16 @@ const PUT = async (
   return NextResponse.json(task);
 };
 
-export { PUT };
+const DELETE = async (
+  req: NextRequest,
+  { params }: { params: { id: string; taskId: string } },
+) => {
+  await prisma.tasks.delete({
+    where: {
+      id: parseInt(params.taskId),
+    },
+  });
+  return NextResponse.json({ success: true });
+};
+
+export { PUT, DELETE };
