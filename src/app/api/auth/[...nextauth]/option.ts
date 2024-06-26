@@ -2,37 +2,15 @@ import prisma from "@/lib/prisma";
 import PrismaAdapter from "@/lib/PrismaAdapter";
 import { User as U } from "@/types";
 import type { NextAuthOptions, Session, User } from "next-auth";
-import CredentialProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
+import DiscordProvider from "next-auth/providers/discord";
 
 export const options: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET as string,
   providers: [
-    CredentialProvider({
-      name: "credentials",
-      credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: {
-          label: "Password",
-          type: "password",
-          placeholder: "Password",
-        },
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "example@example.com",
-        },
-      },
-      async authorize(credentials: any): Promise<any> {
-        const user = await prisma.users.findFirst({
-          where: { email_address: credentials.email },
-        });
-        if (user && user.password === credentials.password) {
-          return user;
-        } else {
-          return null;
-        }
-      },
+    DiscordProvider({
+      clientId: process.env.DISCORD_ID as string,
+      clientSecret: process.env.DISCORD_SECRET as string,
     }),
 
     GithubProvider({

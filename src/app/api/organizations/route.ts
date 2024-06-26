@@ -52,13 +52,19 @@ export async function GET() {
 
   // Rename all organizationsMemberships to members
   organizations.forEach((org) => {
+    //@ts-ignore
     org.members = [];
     org.OrganizationsMemberships.forEach((membership) => {
+      //@ts-ignore
       org.members.push(membership.user);
     });
+    //@ts-ignore
     delete org.OrganizationsMemberships;
+    //@ts-ignore
     delete org.owner.password;
+    //@ts-ignore
     delete org.owner_id;
+    //@ts-ignore
     delete org.logo_id;
   });
 
@@ -97,6 +103,7 @@ export async function POST(request: Request) {
           },
       owner: {
         connect: {
+          //@ts-ignore
           id: owner_id ?? session.user.id,
         },
       },
@@ -108,6 +115,7 @@ export async function POST(request: Request) {
     data: {
       user: {
         connect: {
+          //@ts-ignore
           id: owner ?? session.user.id,
         },
       },

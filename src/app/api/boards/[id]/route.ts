@@ -13,7 +13,7 @@
 // }
 
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 type Params = {
   params: {
@@ -21,7 +21,7 @@ type Params = {
   };
 };
 
-const GET = async (res: NextResponse, { params }: Params) => {
+const GET = async (req: NextRequest, { params }: Params) => {
   const { id } = params;
   const board = await prisma.boards.findUnique({
     where: {
@@ -38,7 +38,7 @@ const GET = async (res: NextResponse, { params }: Params) => {
   return Response.json(board);
 };
 
-const DELETE = async (res: NextResponse, { params }: Params) => {
+const DELETE = async (req: NextRequest, { params }: Params) => {
   const { id } = params;
   const board = await prisma.boards.delete({
     where: {
@@ -49,9 +49,9 @@ const DELETE = async (res: NextResponse, { params }: Params) => {
   return Response.json(board);
 };
 
-const PUT = async (res: NextResponse, { params }: Params) => {
+const PUT = async (req: NextRequest, { params }: Params) => {
   const { id } = params;
-  const requestData = await res.json();
+  const requestData = await req.json();
 
   const updatedBoard = await prisma.boards.update({
     where: {
