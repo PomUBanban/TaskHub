@@ -14,8 +14,8 @@ model Images {
 
   organizations Organizations[]
   Users         Users?
-  BoardsIcon    Boards[]       @relation("BoardsIcon")
-  BoardsBg      Boards[]       @relation("BoardsBg")
+  BoardsIcon    Boards[]        @relation("BoardsIcon")
+  BoardsBg      Boards[]        @relation("BoardsBg")
   TasksImages   TasksImages[]
 }
 
@@ -67,8 +67,8 @@ model Groups {
 }
 
 model Boards {
-  id              Int    @id @default(autoincrement())
-  organization_id Int    
+  id              Int           @id @default(autoincrement())
+  organization_id Int
   name            String
   icon_id         Int
   background_id   Int
@@ -82,20 +82,15 @@ model TaskGroups {
   id       Int    @id @default(autoincrement())
   board_id Int
   name     String
-  order    Int
 
   board Boards  @relation(fields: [board_id], references: [id])
   Tasks Tasks[]
 }
 
 model Tasks {
-  id            Int      @id @default(autoincrement())
+  id            Int    @id @default(autoincrement())
   task_group_id Int
   name          String
-  description   String
-  order         Int
-  due_date      DateTime
-  status        String
 
   task_group TaskGroups @relation(fields: [task_group_id], references: [id])
 

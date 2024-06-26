@@ -39,9 +39,9 @@ const POST = async (res: NextResponse) => {
   if (!session) {
     return new Response("Unauthorized", { status: 401 });
   }
-
+  // name, orgaID, icon, background
   const requestData = await res.json();
-
+  console.log(requestData.organization_id);
   const newBoard = await prisma.boards.create({
     data: {
       name: requestData.name,
@@ -50,14 +50,14 @@ const POST = async (res: NextResponse) => {
       },
       icon: requestData.icon_id
         ? { connect: { id: requestData.icon_id } }
-        : { create: { raw_image: requestData.icon } },
+        : { create: { raw_image: requestData.icon ?? "" } },
       background: requestData.background_id
         ? { connect: { id: requestData.background_id } }
-        : { create: { raw_image: requestData.background } },
+        : { create: { raw_image: requestData.background ?? "" } },
     },
   });
-
-  return NextResponse.json(newBoard);
+  console.log(newBoard);
+  return NextResponse.json(JSON.stringify(newBoard));
 };
 
 export { GET, POST };

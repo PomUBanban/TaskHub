@@ -6,16 +6,19 @@ import { useRouter } from "next/navigation";
 const Page: React.FC = () => {
   const [boards, setBoards] = React.useState([]);
   const router = useRouter();
+  const [organizations, setOrganizations] = React.useState([]);
   useEffect(() => {
-    fetch("/api/boards", {
+    fetch("/api/users/organizations", {
       method: "GET",
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
+        setOrganizations(
+          data.organizationsMemberships.map((org) => org.organization),
+        );
       });
   }, []);
-  //TODO chercher dans quel organisation apparait l'utilisateur connecter et lui afficher les boards de cette organisation
+
   return (
     <div className="flex min-w-screen items-center justify-center">
       <div className="flex w-[90vw] m-5 p-5 flex-col ">
@@ -27,16 +30,10 @@ const Page: React.FC = () => {
             Creer une organisation
           </button>
         </div>
-        <div>
-
-          <Boards
-            organisation={{
-              name: "Organisation name",
-              logo_id: 1,
-              id: 1,
-              owner_id: 1,
-            }}
-          />
+        <div className="flex flex-col gap-10">
+          {organizations.map((org) => (
+            <Boards organisation={org} />
+          ))}
         </div>
       </div>
     </div>

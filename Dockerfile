@@ -6,9 +6,9 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npx prisma generate
 
-CMD npx prisma db push && npm run dev
+
+CMD npx prisma generate && npx prisma db push && npm run dev
 
 
 

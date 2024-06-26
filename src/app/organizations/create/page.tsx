@@ -19,7 +19,7 @@ const Page: React.FC = () => {
       method: "POST",
       body: JSON.stringify({
         name,
-        owner_id: data.user.id,
+        owner_id: data?.user?.id,
         logo_id: "",
         logo: "",
       }),
