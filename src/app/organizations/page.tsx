@@ -144,7 +144,7 @@ const Page = () => {
           break;
       }
     } catch (error) {
-      setError("Erreur lors de l'opération CRUD"); // Handle CRUD operation errors
+      setError("Erreur lors de l&apos;opération CRUD"); // Handle CRUD operation errors
     }
   };
 
@@ -178,7 +178,7 @@ const Page = () => {
               }}
             >
               <div className="row">
-                <label>Nom de l'organisation :</label>
+                <label>Nom de l&apos;organisation :</label>
                 <input
                   type="text"
                   placeholder="Nom de l'organisation"
@@ -244,7 +244,7 @@ const Page = () => {
               </select>
 
               <div className="row">
-                <label>Nouveau Nom de l'organisation :</label>
+                <label>Nouveau Nom de l&apos;organisation :</label>
                 <input
                   type="text"
                   placeholder="Nouveau Nom de l'organisation"

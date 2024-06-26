@@ -23,7 +23,7 @@ const Page = ({ params }: { params: { id: string } }) => {
   const [update, setUpdate] = useState(true);
   const [name, setName] = useState("");
   const [tasksName, setTaskName] = useState("");
-  const [taskGroupId, setTaskGroupId] = useState(0);
+  const [taskGroupId, setTaskGroupId] = useState("0");
   useEffect(() => {
     if (!update) return;
     fetch("/api/boards/" + params.id + "/tasksgroup", {

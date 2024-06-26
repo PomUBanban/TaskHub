@@ -84,7 +84,7 @@ export default function Boards({ organisation }: props) {
           ))
         ) : (
           <div className="flex h-full w-full justify-center text-center items-center">
-            Il n'y a pas de board
+            Il n&apos;y a pas de board
           </div>
         )}
       </div>

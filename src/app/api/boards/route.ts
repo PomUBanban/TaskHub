@@ -12,12 +12,12 @@
 //   TaskGroups TaskGroups[]
 // }
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { options } from "@/app/api/auth/[...nextauth]/option";
 import { getServerSession } from "next-auth";
 
-const GET = async (res: NextResponse) => {
+const GET = async (req: NextRequest) => {
   // Check if user have the access to the boards
   const session = await getServerSession(options);
   if (!session) return Response.json("Unauthorized", { status: 401 });
@@ -34,13 +34,13 @@ const GET = async (res: NextResponse) => {
   return Response.json(boards);
 };
 
-const POST = async (res: NextResponse) => {
+const POST = async (req: NextRequest) => {
   const session = await getServerSession(options);
   if (!session) {
     return new Response("Unauthorized", { status: 401 });
   }
   // name, orgaID, icon, background
-  const requestData = await res.json();
+  const requestData = await req.json();
   console.log(requestData.organization_id);
   const newBoard = await prisma.boards.create({
     data: {

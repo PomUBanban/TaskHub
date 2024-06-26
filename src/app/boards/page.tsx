@@ -14,6 +14,7 @@ const Page: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         setOrganizations(
+          //@ts-ignore
           data.organizationsMemberships.map((org) => org.organization),
         );
       });
@@ -31,8 +32,8 @@ const Page: React.FC = () => {
           </button>
         </div>
         <div className="flex flex-col gap-10">
-          {organizations.map((org) => (
-            <Boards organisation={org} />
+          {organizations.map((org: any) => (
+            <Boards key={org.id} organisation={org} />
           ))}
         </div>
       </div>
