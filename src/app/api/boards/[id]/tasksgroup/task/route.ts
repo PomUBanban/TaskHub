@@ -9,6 +9,7 @@ const POST = async (
   const task = await prisma.tasks.create({
     data: {
       name: data.name,
+      //@ts-ignore
       description: data.description,
       task_group: {
         connect: {

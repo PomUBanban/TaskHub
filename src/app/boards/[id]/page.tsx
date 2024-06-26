@@ -82,6 +82,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             }),
           }).then(() => {
             setUpdate(true);
+            //@ts-ignore
             input.value = "";
           });
         });
