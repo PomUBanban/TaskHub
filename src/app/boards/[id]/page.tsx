@@ -16,6 +16,7 @@ type TaskGroups = {
   name: string;
   Tasks: Task[];
 };
+
 const Page = ({ params }: { params: { id: string } }) => {
   const [tasksGroup, setTasksGroup] = useState([]);
   const [data, setData] = useState({ lanes: [] });
@@ -51,6 +52,43 @@ const Page = ({ params }: { params: { id: string } }) => {
         };
       }) as any,
     });
+
+    // Add a "add task" button to every lane after 1s
+    setTimeout(() => {
+      const lanes = document.querySelectorAll(".react-trello-lane");
+
+      lanes.forEach((lane) => {
+        if (lane.querySelector(".add-task-form")) {
+          return;
+        }
+
+        const form = document.createElement("div");
+        form.className = "add-task-form";
+        form.innerHTML = `
+          <input type="text" placeholder="Create a task" />
+          <button>Create</button>
+        `;
+
+        const button = form.querySelector("button");
+        const input = form.querySelector("input");
+
+        button?.addEventListener("click", () => {
+          const taaskGroupId = lane.getAttribute("label")?.split(":")[1].trim();
+          fetch("/api/boards/" + params.id + "/tasksgroup/task", {
+            method: "POST",
+            body: JSON.stringify({
+              name: input?.value,
+              taskGroupId: taaskGroupId,
+            }),
+          }).then(() => {
+            setUpdate(true);
+            input.value = "";
+          });
+        });
+
+        lane.appendChild(form);
+      });
+    }, 1000);
   }, [tasksGroup]);
 
   // Update Task when moved to another group
@@ -68,71 +106,39 @@ const Page = ({ params }: { params: { id: string } }) => {
   };
 
   return (
-    <div>
-      <div className="flex w-[20%]">
-        <input
-          value={tasksName}
-          onChange={(e) => setTaskName(e.target.value)}
-          placeholder="Creer une tache"
-          className="text-black"
-        />
-        <select
-          value={taskGroupId}
-          onChange={(e) => setTaskGroupId(parseInt(e.target.value))}
-        >
-          <option value={0}>Select Task Group</option>
-          {tasksGroup.map((group: TaskGroups) => (
-            <option key={group.id} value={group.id}>
-              {group.name}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={() => {
-            fetch("/api/boards/" + params.id + "/tasksgroup/task", {
-              method: "POST",
-              body: JSON.stringify({ name: tasksName, taskGroupId }),
-            }).then(() => {
-              setUpdate(true);
-              setTaskGroupId(0);
-              setTaskName("");
-            });
-          }}
-        >
-          Creer
-        </button>
-      </div>
-      {/*  Row */}
-      <div className="flex">
-        <Board data={data} handleDragEnd={handleDragEnd} />
+    <>
+      <div>
         <div className="flex">
-          <div className="flex flex-col align-center">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Creer une liste"
-              className="text-black"
-            />
-            <div className="flex items-center justify-center">
-              <button
-                className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full cursor-pointer"
-                onClick={() => {
-                  fetch("/api/boards/" + params.id + "/tasksgroup", {
-                    method: "POST",
-                    body: JSON.stringify({ name }),
-                  }).then(() => {
-                    setUpdate(true);
-                    setName("");
-                  });
-                }}
-              >
-                +
-              </button>
+          <Board data={data} handleDragEnd={handleDragEnd} />
+          <div className="flex">
+            <div className="flex flex-col align-center">
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Creer une liste"
+                className="text-black"
+              />
+              <div className="flex items-center justify-center">
+                <button
+                  className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full cursor-pointer"
+                  onClick={() => {
+                    fetch("/api/boards/" + params.id + "/tasksgroup", {
+                      method: "POST",
+                      body: JSON.stringify({ name }),
+                    }).then(() => {
+                      setUpdate(true);
+                      setName("");
+                    });
+                  }}
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
