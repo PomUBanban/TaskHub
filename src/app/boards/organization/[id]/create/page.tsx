@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
+import React, { use, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
 
-const Page: React.FC = () => {
+const Page = ({ params }: { params: { id: string } }) => {
   const { data } = useSession({
     required: true,
     onUnauthenticated() {
@@ -13,12 +13,14 @@ const Page: React.FC = () => {
   const router = useRouter();
 
   const [name, setName] = React.useState("");
+  const [organization_id, setOrganization_id] = React.useState("");
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await fetch("/api/organizations", {
+    await fetch("/api/boards", {
       method: "POST",
       body: JSON.stringify({
         name,
+        organization_id: parseInt(organization_id),
         //@ts-ignore
         owner_id: data?.user?.id,
         logo_id: "",
@@ -28,6 +30,13 @@ const Page: React.FC = () => {
     router.push("/boards");
   };
 
+  useEffect(() => {
+    setOrganization_id(
+      //@ts-ignore
+      document.getElementById("organization_id").value,
+    );
+  }, []);
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -35,8 +44,10 @@ const Page: React.FC = () => {
     >
       <div className="flex flex-col w-full mb-4">
         <label htmlFor="name" className="mb-2 font-semibold text-gray-700">
-          Name
+          Board name
         </label>
+        {/* hidden_input containing organization_id */}
+        <input type="hidden" value={params.id} id="organization_id" />
         <input
           className="p-3 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           onChange={(e) => setName(e.target.value)}

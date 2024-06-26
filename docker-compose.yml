@@ -10,15 +10,14 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./:/usr/TaskHub
       - /usr/TaskHub/node_modules
     command: >
-      sh -c "npx prisma generate && npx prisma db push && npm run dev"
+      sh -c "npx prisma generate && npx prisma db push && npm run build && npm run start"
 
   db:
     image: mysql:latest
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 1s
       timeout: 5s
       retries: 300

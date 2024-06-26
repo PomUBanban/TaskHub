@@ -9,6 +9,7 @@ type props = {
 
 export default function Boards({ organisation }: props) {
   /* TODO: change boards name */
+  const router = useRouter();
   const [isInputShown, setIsInputShown] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
   const [boards, setBoards] = useState([]);
@@ -31,38 +32,12 @@ export default function Boards({ organisation }: props) {
       <div className="flex justify-between">
         <h1 className="text-3xl">{organisation.name}</h1>
         <div>
-          {isInputShown && (
-            <input
-              onChange={(e) => setNewBoardName(e.target.value)}
-              value={newBoardName}
-              type="text"
-              placeholder="Enter name"
-              className="text-black p-4 rounded-xl"
-            />
-          )}
+          {/* Button redirecting on /board/create */}
           <button
             className="text-xl p-4 bg-blue-500 rounded-xl"
-            onClick={() => {
-              setIsInputShown(!isInputShown);
-              if (newBoardName != "") {
-                console.log(newBoardName);
-                setNewBoardName("");
-                fetch("/api/boards", {
-                  method: "POST",
-                  body: JSON.stringify({
-                    name: newBoardName,
-                    organization_id: organisation.id,
-                  }),
-                })
-                  .then((res) => res.json())
-                  .then((data) => {
-                    // @ts-ignore
-                    setBoards([...boards, data]);
-                    setNeedToRefresh(true);
-                  })
-                  .catch((err) => console.log(err));
-              }
-            }}
+            onClick={() =>
+              router.push("/boards/organization/" + organisation.id + "/create")
+            }
           >
             Creer une board
           </button>
